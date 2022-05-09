@@ -52,8 +52,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //creating a task li element and buttons
     const task = document.createElement('li')
+    const span = document.createElement('span')
     const btn1 = document.createElement('button')
     const btn2 = document.createElement('button')
+    span.id = 'task'
     btn1.textContent = 'X'
     btn2.textContent = 'Edit'
     //adding click listeners to the buttons with associated fns
@@ -61,21 +63,35 @@ document.addEventListener("DOMContentLoaded", () => {
     btn2.addEventListener('click', editList)
     
     //putting the text entry field into the list item, setting the background color to white
-    task.textContent = `${e.target.querySelector('#new-task-description').value} `
-    task.style.backgroundColor = 'white'    
+    span.textContent = `${e.target.querySelector('#new-task-description').value}`
+    //putting an id based on given task onto the li element
+    let keyGen = e.target.querySelector('#new-task-description').value.split(' ')
+    let keyCode = ''
+    //generating part of a unique id tag based on the first letter of each word of the task
+    for (let word of keyGen) {
+      keyCode+= word.charAt(0)
+    }
+    const date = new Date()
+    const secId = date.getMilliseconds()
+    //adding to the id based on current milliseconds to prevent duplication
+    task.id = `${keyCode + secId}`
+
     //correlating selected priority to assign color for element
     if (level === 'Low') {
-      task.style.color = 'green'
+      span.style.color = 'green'
+      task.classList.add('1')
     }
     else if (level === 'Medium') {
-      task.style.color = 'yellow'
+      span.style.color = 'yellow'
+      task.classList.add('2')
     }
     else if (level === 'High') {
-      task.style.color = 'red'
+      span.style.color = 'red'
+      task.classList.add('3')
     }
 
-    
-    //adding the buttons onto the task item
+    //adding the buttons onto the span item
+    task.appendChild(span)
     task.appendChild(btn1)
     task.appendChild(btn2)
     //getting the owner info and adding it to the end of the list item
@@ -98,17 +114,30 @@ document.addEventListener("DOMContentLoaded", () => {
   //fn features text entry popup but currently deletes existing buttons after edit
   function editList(e) {
     let input = prompt('Enter new task', '')
-    e.target.parentNode.textContent = input
+    console.log(e.target)
+    console.log(e.target.parentNode)
+    e.target.parentNode.querySelector('#task').innerText = input
   }
 
   //fn only changes the sorting method displayed on button
   function toggleSort(e) {
-    console.log(e.target)
     if (e.target.textContent === 'Sort: Descending') {
       e.target.textContent = 'Sort: Ascending'
+      const tempTaskList = [...document.querySelectorAll('#tasks li')]
+      const sortTaskList = tempTaskList.sort((a,b) => {
+        return parseInt(a.classList[0]) - parseInt(b.classList[0])
+      })
+      document.querySelector('#tasks').replaceChildren()
+      sortTaskList.forEach(task => document.querySelector('#tasks').appendChild(task))
     }
     else {
       e.target.textContent = 'Sort: Descending'
+      const tempTaskList = [...document.querySelectorAll('#tasks li')]
+      const sortTaskList = tempTaskList.sort((a,b) => {
+        return parseInt(b.classList[0]) - parseInt(a.classList[0])
+      })
+      document.querySelector('#tasks').replaceChildren()
+      sortTaskList.forEach(task => document.querySelector('#tasks').appendChild(task))
     }
   }
 });
